@@ -9,7 +9,16 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node"]
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client"]
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "eslint.config.js"]
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "ui/**/*.ts",
+    "ui/**/*.tsx",
+    "vite.config.ts",
+    "eslint.config.js"
+  ]
 }

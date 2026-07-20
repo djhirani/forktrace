@@ -243,6 +243,51 @@
         display: flex;
         gap: 10px;
       }
+      .raw-dialog {
+        width: min(960px, calc(100vw - 48px));
+        height: min(720px, calc(100vh - 48px));
+        padding: 0;
+        border: 1px solid #465238;
+        border-radius: 8px;
+        background: #0c0f0e;
+        color: #f2f5f0;
+        box-shadow: 0 30px 110px #000;
+      }
+      .raw-dialog::backdrop {
+        background: rgba(2, 4, 3, 0.84);
+        backdrop-filter: blur(8px);
+      }
+      .raw-dialog-shell {
+        height: 100%;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+      .raw-dialog-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+      }
+      .raw-dialog-header h2 {
+        font-size: 15px;
+      }
+      .raw-dialog-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+      }
+      .raw-jsonl {
+        margin: 0;
+        padding: 18px;
+        overflow: auto;
+        background: #080a09;
+        color: #cbd5ce;
+        font:
+          12px/1.65 ui-monospace,
+          monospace;
+        white-space: pre;
+      }
       @media (max-width: 720px) {
         .correction-grid {
           grid-template-columns: 1fr;
@@ -298,18 +343,35 @@
       </section>
       <section class="timeline" id="timeline" aria-live="polite"></section>
       <div class="links">
-        <a class="button" href="/original.jsonl">Raw original JSONL</a
-        ><a class="button" href="/precomputed-fork.jsonl"
-          >Raw precomputed fork JSONL</a
-        >
+        <button class="raw-jsonl-button" data-jsonl="original.jsonl">
+          Raw original JSONL</button
+        ><button class="raw-jsonl-button" data-jsonl="precomputed-fork.jsonl">
+          Raw precomputed fork JSONL
+        </button>
       </div>
     </main>
+    <dialog class="raw-dialog" id="raw-dialog">
+      <div class="raw-dialog-shell">
+        <header class="raw-dialog-header">
+          <h2 id="raw-dialog-title">Raw JSONL</h2>
+          <div class="raw-dialog-actions">
+            <button id="copy-jsonl">Copy</button>
+            <button id="close-jsonl">Close</button>
+          </div>
+        </header>
+        <pre class="raw-jsonl" id="raw-jsonl-content"></pre>
+      </div>
+    </dialog>
     <script>
       const timeline = document.querySelector("#timeline");
       const diff = document.querySelector("#diff");
       const correctionGrid = document.querySelector("#correction-grid");
       const statusTransition = document.querySelector("#status-transition");
       const forkSummary = document.querySelector("#fork-summary");
+      const rawDialog = document.querySelector("#raw-dialog");
+      const rawDialogTitle = document.querySelector("#raw-dialog-title");
+      const rawJsonlContent = document.querySelector("#raw-jsonl-content");
+      const copyJsonl = document.querySelector("#copy-jsonl");
       const buttons = [
         document.querySelector("#original"),
         document.querySelector("#fork"),
@@ -341,6 +403,31 @@
         );
         return text.trim().split("\n").map(JSON.parse);
       }
+      document.querySelectorAll(".raw-jsonl-button").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const name = button.dataset.jsonl;
+          rawDialogTitle.textContent = name;
+          rawJsonlContent.textContent = "Loading…";
+          copyJsonl.textContent = "Copy";
+          rawDialog.showModal();
+          try {
+            const response = await fetch("/" + name);
+            if (!response.ok) throw new Error("Unable to load JSONL");
+            rawJsonlContent.textContent = await response.text();
+          } catch (error) {
+            rawJsonlContent.textContent =
+              error instanceof Error ? error.message : "Unable to load JSONL";
+          }
+        });
+      });
+      document.querySelector("#close-jsonl").onclick = () => rawDialog.close();
+      rawDialog.addEventListener("click", (event) => {
+        if (event.target === rawDialog) rawDialog.close();
+      });
+      copyJsonl.onclick = async () => {
+        await navigator.clipboard.writeText(rawJsonlContent.textContent);
+        copyJsonl.textContent = "Copied";
+      };
       function refundCall(events) {
         return events.find(
           (event) =>

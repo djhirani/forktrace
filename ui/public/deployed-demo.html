@@ -189,7 +189,7 @@
         diverged: "DIVERGED — live execution from here",
       };
       async function show(name) {
-        const text = await fetch("/demo/" + name).then((r) => r.text());
+        const text = await fetch("/" + name).then((r) => r.text());
         const events = text.trim().split("\n").map(JSON.parse);
         timeline.innerHTML = events
           .map(

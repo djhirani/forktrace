@@ -2,6 +2,21 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DiffReport } from "../../src/diff.js";
 import type { TraceEvent } from "../../src/types.js";
 
+function ForkTraceLogo() {
+  return (
+    <div className="brand-mark" aria-label="ForkTrace">
+      <svg viewBox="0 0 48 48" role="img" aria-hidden="true">
+        <path className="logo-frame" d="M8 7.5h32v33H8z" />
+        <path className="logo-trace" d="M15 15h8v18h10" />
+        <path className="logo-fork" d="M23 24h6l5-5" />
+        <circle className="logo-node" cx="15" cy="15" r="2" />
+        <circle className="logo-node" cx="34" cy="19" r="2" />
+        <circle className="logo-node" cx="33" cy="33" r="2" />
+      </svg>
+    </div>
+  );
+}
+
 interface RunSummary {
   file_name: string;
   run_id: string;
@@ -126,22 +141,33 @@ export function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <div className="brand-mark">FT</div>
-        <div>
-          <p className="eyebrow">Observable agent debugging</p>
-          <h1>ForkTrace</h1>
+        <div className="brand-lockup">
+          <ForkTraceLogo />
+          <div>
+            <h1>ForkTrace</h1>
+            <p className="eyebrow">Agent execution debugger</p>
+          </div>
+        </div>
+        <div className="header-context" aria-hidden="true">
+          <span className="signal-dot" />
+          <span>Local trace environment</span>
         </div>
         <button
           className="demo-button"
           disabled={busy}
           onClick={() => void runDemo()}
         >
+          <span className="button-icon">▶</span>
           {busy ? "Running…" : "Run demo scenario"}
         </button>
       </header>
 
       <main className="workspace">
         <aside className="run-panel">
+          <div className="rail-brandline">
+            <span>Trace explorer</span>
+            <span className="rail-version">v0.1</span>
+          </div>
           <div className="panel-heading">
             <span>Runs</span>
             <span className="count">{runs.length}</span>

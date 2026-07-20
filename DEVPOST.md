@@ -2,7 +2,7 @@
 
 When an AI agent fails, developers usually get a wall of logs and rerun the whole workflow. ForkTrace creates the missing debugging loop: pause at the bad observable event, change one value, replay only what follows, and compare the result with the immutable original.
 
-The demo records a deterministic customer-refund failure involving two nearby records: John Weller (`CUST-1041`) and Jon Weller (`CUST-1042`). The original sends the wrong ID to `process_refund` and fails. A developer forks that tool call, corrects one argument, and replays. ForkTrace marks the exact `DIVERGED` point, runs the changed in-memory tool safely, and shows the original failure beside the successful fork.
+The demo records a deterministic customer-refund failure involving two nearby records: John Wheeler (`CUST-1041`) and Jon Weller (`CUST-1042`). The original sends the wrong ID to `process_refund` and fails. A developer forks that tool call, corrects one argument, and replays. ForkTrace marks the exact `DIVERGED` point, runs the changed in-memory tool safely, and shows the original failure beside the successful fork.
 
 ForkTrace records observable evidence only—inputs, model messages, tool calls/results, JSON state, errors, outputs, timing, and tokens. It never claims to expose hidden reasoning. Original traces are append-only JSONL; forks carry complete lineage. Exact-match tool calls use memoized recorded results without re-executing side effects, while changed calls are visibly marked and executed live.
 

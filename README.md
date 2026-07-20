@@ -40,7 +40,7 @@ All context is JSON-round-trip validated. Originals are never rewritten. A fork 
 
 The deterministic customer-support run receives two nearby records:
 
-- `John Weller` — correct, `CUST-1041`
+- `John Wheeler` — correct, `CUST-1041`
 - `Jon Weller` — wrong, `CUST-1042`
 
 The planted run structurally selects `CUST-1042`, sends it to `process_refund`, and records `CUSTOMER_MISMATCH`. Fork event 8, change only `CUST-1042` to `CUST-1041`, and replay. The fork records its first divergence, executes the safe tool live, and passes.

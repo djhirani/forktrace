@@ -1,4 +1,5 @@
 export * from "./json.js";
+export * from "./diff.js";
 export * from "./fork.js";
 export * from "./recorder.js";
 export * from "./replay.js";

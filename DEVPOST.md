@@ -11,3 +11,8 @@ Built with TypeScript, the OpenAI Agents SDK, React, Vite, and a six-stage Codex
 **Category selection note:** Developer Tools / Best Use of OpenAI Agents SDK.
 
 **Submission assets:** public repository, sub-three-minute demo video, read-only deployed walkthrough with bundled JSONL evidence, local live demo instructions, architecture README, and Codex `/feedback` Session ID.
+
+- Public repository: https://github.com/djhirani/forktrace
+- Read-only deployed walkthrough: https://forktrace.vercel.app
+- Codex `/feedback` Session ID: `019f7d30-8e3e-7583-be0c-37e6a1e388c2`
+- YouTube demo: `YOUTUBE_URL_HERE`

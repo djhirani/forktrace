@@ -4,6 +4,10 @@
 
 ForkTrace is time-travel debugging for OpenAI Agents SDK executions. It records an agent run as immutable JSONL, lets a developer fork at one observable event, replays only the downstream path with memoized tool results, marks the first changed execution as `DIVERGED`, and reports the measured difference between the original and fork.
 
+- Public repository: https://github.com/djhirani/forktrace
+- Read-only deployed walkthrough: https://forktrace.vercel.app
+- Codex `/feedback` Session ID: `019f7d30-8e3e-7583-be0c-37e6a1e388c2`
+
 ## Honesty position
 
 ForkTrace records observable evidence only: user inputs, model messages or decisions, tool calls, tool results, JSON state snapshots, errors, final outputs, timing, and token usage. It never claims to display hidden reasoning or chain of thought. A `DIVERGED` event means recorded arguments stopped matching and execution continued live; it is not an inference about why a model acted.
@@ -104,7 +108,7 @@ Codex generated and iterated on the TypeScript implementation, tests, UI, script
 
 ## Deployment behavior
 
-The local app supports live record, fork, and replay because it can write `traces/runs`. The Vercel build is intentionally read-only: it shows the bundled original and precomputed fork, labels the replay as precomputed, and links to the raw JSONL evidence. It does **not** fake a live replay. Run locally for an editable fork.
+The local app supports live record, fork, and replay because it can write `traces/runs`. The [Vercel walkthrough](https://forktrace.vercel.app) is intentionally read-only: it shows the bundled original and precomputed fork, labels the replay as precomputed, and links to the raw JSONL evidence. It does **not** fake a live replay. Run locally for an editable fork.
 
 ## Limitations
 

@@ -3,10 +3,9 @@
 ## Required links
 
 - [ ] Public YouTube demo video, under 3 minutes: `YOUTUBE_URL_HERE`
-- [ ] Public GitHub repository: `GITHUB_REPOSITORY_URL_HERE`
-- [ ] Codex `/feedback` Session ID: `CODEX_FEEDBACK_SESSION_ID_HERE`
-  - In the Codex session used for the milestone work, run `/feedback`, submit the feedback form, and copy the returned Session ID here.
-- [ ] Deployed read-only demo: `DEPLOYED_DEMO_URL_HERE`
+- [x] Public GitHub repository: https://github.com/djhirani/forktrace
+- [x] Codex `/feedback` Session ID: `019f7d30-8e3e-7583-be0c-37e6a1e388c2`
+- [x] Deployed read-only demo: https://forktrace.vercel.app
 - [ ] Local testable build instructions verified from a fresh clone
 
 ## Technical acceptance
@@ -25,7 +24,7 @@
 ## Submission assets
 
 - [ ] YouTube visibility is public
-- [ ] Repository visibility is public
+- [x] Repository visibility is public
 - [ ] README links and commands checked
 - [ ] Devpost description pasted from `DEVPOST.md`
 - [ ] Demo reset run immediately before recording

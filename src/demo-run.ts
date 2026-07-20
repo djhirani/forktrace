@@ -24,7 +24,7 @@ export async function recordDemoRun(
   await recorder.append(
     event({
       event_type: "user_input",
-      input: "Refund £25 to the account for J. Ahmed",
+      input: "Refund £25 to the account for John Weller",
     }),
   );
   await recorder.append(
@@ -36,14 +36,14 @@ export async function recordDemoRun(
   await recorder.append(
     event({
       event_type: "model_output",
-      output: { decision: "lookup_customer", query: "J. Ahmed" },
+      output: { decision: "lookup_customer", query: "John Weller" },
       token_usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
     }),
   );
   await recorder.append(
     event({
       event_type: "tool_call",
-      input: { name: "J. Ahmed" },
+      input: { name: "John Weller" },
       tool_name: "customer_lookup",
       tool_call_id: "call_lookup_001",
       status: "started",

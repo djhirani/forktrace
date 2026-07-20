@@ -40,7 +40,7 @@ async function createOriginal(): Promise<string> {
     }),
   );
   await recorder.append(
-    base({ event_type: "user_input", input: "Refund J. Ahmed" }),
+    base({ event_type: "user_input", input: "Refund John Weller" }),
   );
   await recorder.append(
     base({

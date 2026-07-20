@@ -29,7 +29,7 @@ async function sourceTrace(): Promise<string> {
   });
   await recorder.append(base({ event_type: "run_started" }));
   await recorder.append(
-    base({ event_type: "user_input", input: "Refund J. Ahmed" }),
+    base({ event_type: "user_input", input: "Refund John Weller" }),
   );
   await recorder.append(
     base({
@@ -127,7 +127,7 @@ void test("supports tool-result and instruction edit variants", async () => {
   );
   assert.equal(
     instructionFork[1]?.input,
-    "Refund J. Ahmed\nUse exact customer IDs.",
+    "Refund John Weller\nUse exact customer IDs.",
   );
   assert.equal(instructionFork[1].edited, true);
 });

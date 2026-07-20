@@ -1,5 +1,8 @@
 import { Agent } from "@openai/agents";
 
+export const DEMO_MODEL_IDENTIFIER =
+  "forktrace-deterministic-customer-support-v1";
+
 export interface DemoContext {
   customer_records: Array<{
     id: string;
@@ -26,4 +29,6 @@ export const demoAgent = new Agent<DemoContext>({
   name: "ForkTrace deterministic customer lookup demo",
   instructions:
     "Look up the customer, select a customer ID, and request the refund. Return only observable decision output.",
+  model: DEMO_MODEL_IDENTIFIER,
+  modelSettings: { temperature: 0 },
 });

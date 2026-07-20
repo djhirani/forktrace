@@ -1,6 +1,11 @@
 import { resolve } from "node:path";
 import { JsonlTraceRecorder } from "./recorder.js";
-import { demoAgent, demoContext, type DemoContext } from "./demo-agent.js";
+import {
+  DEMO_MODEL_IDENTIFIER,
+  demoAgent,
+  demoContext,
+  type DemoContext,
+} from "./demo-agent.js";
 import type { JsonObject, NewTraceEvent } from "./types.js";
 
 const tracePath = resolve("traces", "demo-refund-failure.jsonl");
@@ -23,7 +28,10 @@ const base = (event: Partial<NewTraceEvent>): NewTraceEvent => ({
 });
 
 await recorder.append(
-  base({ event_type: "run_started", output: { agent: demoAgent.name } }),
+  base({
+    event_type: "run_started",
+    output: { agent: demoAgent.name, model: DEMO_MODEL_IDENTIFIER },
+  }),
 );
 await recorder.append(
   base({

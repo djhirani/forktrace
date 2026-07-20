@@ -13,10 +13,12 @@ export const eventTypes = [
   "error",
   "final_output",
   "run_completed",
+  "diverged",
 ] as const;
 
 export type EventType = (typeof eventTypes)[number];
-export type EventStatus = "started" | "completed" | "failed" | "ok";
+export type EventStatus =
+  "started" | "completed" | "failed" | "ok" | "diverged";
 
 export interface TokenUsage {
   input_tokens: number;
@@ -42,6 +44,8 @@ export interface TraceEvent {
   latency_ms: number | null;
   token_usage: TokenUsage | null;
   edited?: true;
+  replayed_from_recording?: true;
+  last_matching_event_index?: number | null;
 }
 
 export type NewTraceEvent = Omit<

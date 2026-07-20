@@ -6,6 +6,7 @@
   "scripts": {
     "demo": "node --import tsx src/demo.ts",
     "fork": "node --import tsx src/fork-cli.ts",
+    "replay": "node --import tsx src/replay-cli.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",

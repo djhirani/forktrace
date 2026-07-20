@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ForkTrace — Precomputed walkthrough</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        background: #08100f;
+        color: #e9f3ef;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at 70% -10%, #1b382f, transparent 35%), #08100f;
+      }
+      header,
+      main {
+        max-width: 1180px;
+        margin: auto;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 28px 24px;
+        border-bottom: 1px solid #293832;
+      }
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+      .mark {
+        border: 1px solid #4c7768;
+        color: #68e0b1;
+        padding: 12px;
+        font-weight: 700;
+      }
+      .sub {
+        color: #8fa39c;
+        margin-top: 4px;
+      }
+      .notice {
+        margin: 24px;
+        padding: 16px 18px;
+        border: 1px solid #ffbd66;
+        background: #241b0d;
+        color: #ffe1ad;
+        line-height: 1.5;
+      }
+      .controls {
+        display: flex;
+        gap: 10px;
+        padding: 0 24px 20px;
+      }
+      button,
+      a.button {
+        border: 1px solid #42675b;
+        background: #14231f;
+        color: #dff5ed;
+        padding: 11px 15px;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      button.active {
+        background: #68e0b1;
+        color: #07100d;
+        font-weight: 700;
+      }
+      .diff {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 0 24px 18px;
+        padding: 16px;
+        border: 1px solid #41695b;
+        background: #101d19;
+        font-family: ui-monospace, monospace;
+      }
+      .failed {
+        color: #ff8585;
+      }
+      .passed {
+        color: #68e0b1;
+      }
+      .timeline {
+        margin: 0 24px 40px;
+        border: 1px solid #26362f;
+        background: #101916;
+      }
+      .event {
+        display: grid;
+        grid-template-columns: 55px 1fr auto;
+        gap: 14px;
+        padding: 13px 16px;
+        border-bottom: 1px solid #24322d;
+        align-items: center;
+      }
+      .index,
+      .meta {
+        color: #8fa39c;
+        font:
+          12px ui-monospace,
+          monospace;
+      }
+      .event strong {
+        font-size: 14px;
+      }
+      .event p {
+        color: #9db0a9;
+        font:
+          12px ui-monospace,
+          monospace;
+        margin-top: 4px;
+      }
+      .event.diverged {
+        border: 1px solid #ffbd66;
+        background: #251b0d;
+      }
+      .tag {
+        color: #171005;
+        background: #ffbd66;
+        padding: 5px 8px;
+        font:
+          700 10px ui-monospace,
+          monospace;
+      }
+      .links {
+        padding: 0 24px 40px;
+        display: flex;
+        gap: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="mark">FT</div>
+      <div>
+        <h1>ForkTrace</h1>
+        <p class="sub">Read-only deployed evidence walkthrough</p>
+      </div>
+    </header>
+    <main>
+      <div class="notice">
+        <strong>This hosted replay is precomputed—not live.</strong> Vercel
+        cannot persist new JSONL fork files in this static deployment. Use the
+        buttons below to inspect the bundled immutable original and its
+        precomputed fork. Clone the repository to edit and replay live.
+      </div>
+      <div class="controls">
+        <button id="original" class="active">Original failing run</button
+        ><button id="fork">Show precomputed fork &amp; diff</button>
+      </div>
+      <section class="diff" id="diff" hidden>
+        <div class="failed">Original: Failed | 2 tool calls | 0.0 s</div>
+        <div class="passed">Fork: Passed | 3 tool calls | 0.0 s</div>
+      </section>
+      <section class="timeline" id="timeline" aria-live="polite"></section>
+      <div class="links">
+        <a class="button" href="/original.jsonl">Raw original JSONL</a
+        ><a class="button" href="/precomputed-fork.jsonl"
+          >Raw precomputed fork JSONL</a
+        >
+      </div>
+    </main>
+    <script>
+      const timeline = document.querySelector("#timeline");
+      const diff = document.querySelector("#diff");
+      const buttons = [
+        document.querySelector("#original"),
+        document.querySelector("#fork"),
+      ];
+      const labels = {
+        run_started: "Run started",
+        user_input: "User input",
+        model_output: "Model decision",
+        tool_call: "Tool call",
+        tool_result: "Tool result",
+        context_snapshot: "State snapshot",
+        error: "Error",
+        final_output: "Final output",
+        run_completed: "Run completed",
+        diverged: "DIVERGED — live execution from here",
+      };
+      async function show(name) {
+        const text = await fetch("/demo/" + name).then((r) => r.text());
+        const events = text.trim().split("\n").map(JSON.parse);
+        timeline.innerHTML = events
+          .map(
+            (e) =>
+              `<article class="event ${e.event_type === "diverged" ? "diverged" : ""}"><span class="index">${String(e.event_index).padStart(2, "0")}</span><div>${e.event_type === "diverged" ? '<span class="tag">DIVERGED</span>' : ""}<strong>${labels[e.event_type]}</strong><p>${e.tool_name ?? e.status}</p></div><span class="meta">${e.status}</span></article>`,
+          )
+          .join("");
+      }
+      buttons[0].onclick = () => {
+        buttons[0].classList.add("active");
+        buttons[1].classList.remove("active");
+        diff.hidden = true;
+        show("original.jsonl");
+      };
+      buttons[1].onclick = () => {
+        buttons[1].classList.add("active");
+        buttons[0].classList.remove("active");
+        diff.hidden = false;
+        show("precomputed-fork.jsonl");
+      };
+      show("original.jsonl");
+    </script>
+  </body>
+</html>

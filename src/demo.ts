@@ -59,7 +59,7 @@ context.lookup_attempts += 1;
 await recorder.append(
   base({
     event_type: "tool_result",
-    output: context.customer_records as unknown as JsonObject[],
+    output: context.customer_records,
     tool_name: "customer_lookup",
     tool_call_id: "call_lookup_001",
     latency_ms: 0,

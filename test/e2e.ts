@@ -42,6 +42,10 @@ try {
       };
       fork: { status: string; tool_calls: number; total_latency_ms: number };
       first_divergence_event_index: number | null;
+      findings: Array<{
+        message: string;
+        evidence: Array<{ trace: string; event_indexes: number[] }>;
+      }>;
     };
   }>(`${origin}/api/fork`, {
     method: "POST",
@@ -64,6 +68,13 @@ try {
   assert.equal(fork.report.original.total_latency_ms, 0);
   assert.equal(fork.report.fork.total_latency_ms, 0);
   assert.equal(fork.report.first_divergence_event_index, 10);
+  assert.equal(
+    fork.report.findings[0]?.message,
+    "Fork recorded 1 first divergence at event 10 for process_refund.",
+  );
+  assert.deepEqual(fork.report.findings[0].evidence, [
+    { trace: "fork", event_indexes: [10] },
+  ]);
   assert.equal(
     fork.text_summary,
     [
@@ -93,6 +104,7 @@ try {
   );
 
   console.log(fork.text_summary);
+  console.log(`Finding: ${fork.report.findings[0].message}`);
   console.log("E2E PASS: run → fork → replay → diff");
 } finally {
   await server.close();

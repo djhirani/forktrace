@@ -312,6 +312,28 @@ button:disabled {
   padding: 18px 20px;
   margin-bottom: 16px;
 }
+.measured-finding {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 130px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  border-top: 1px solid #355047;
+  padding-top: 13px;
+}
+.measured-finding span {
+  color: var(--mint);
+  font: 500 10px "DM Mono";
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.measured-finding strong {
+  font-size: 12px;
+}
+.measured-finding small {
+  color: var(--muted);
+  font: 400 10px "DM Mono";
+}
 .diff-lines {
   display: grid;
   gap: 5px;

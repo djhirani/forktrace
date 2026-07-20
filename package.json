@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "demo": "node --import tsx src/demo.ts",
+    "demo:reset": "node --import tsx src/demo-reset.ts",
+    "demo:audit": "node --import tsx test/demo-determinism.ts",
     "fork": "node --import tsx src/fork-cli.ts",
     "replay": "node --import tsx src/replay-cli.ts",
     "diff": "node --import tsx src/diff-cli.ts",

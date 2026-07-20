@@ -398,6 +398,13 @@ function Detail({ label, value }: { label: string; value: unknown }) {
 
 function DiffBanner({ result }: { result: ForkResponse }) {
   const [original, fork] = result.text_summary.split("\n");
+  const finding = result.report.findings[0];
+  const evidence = finding?.evidence
+    .map(
+      ({ trace, event_indexes }) =>
+        `${trace} event${event_indexes.length === 1 ? "" : "s"} ${event_indexes.join(", ")}`,
+    )
+    .join(" · ");
   return (
     <section className="diff-banner">
       <div>
@@ -415,6 +422,13 @@ function DiffBanner({ result }: { result: ForkResponse }) {
           {result.report.diverged_tool_name}
         </span>
       </div>
+      {finding !== undefined && (
+        <div className="measured-finding">
+          <span>Measured finding</span>
+          <strong>{finding.message}</strong>
+          <small>Evidence: {evidence}</small>
+        </div>
+      )}
     </section>
   );
 }

@@ -20,7 +20,7 @@ npm run dev
 - Select the red **Original** run.
 - Scroll through the 13-event timeline.
 - Click the recorded error and show `CUSTOMER_MISMATCH` in the detail pane.
-- Say: “The requested customer is John Wheeler, but the run selected nearby record Jon Weller and sent `CUST-1042` to the refund tool.”
+- Say: “The requested customer is John Wheeler, but the run selected the wrong John Wheeler record and sent `CUST-1042` to the refund tool.”
 
 ### 1:00 — Inspect the bad call
 

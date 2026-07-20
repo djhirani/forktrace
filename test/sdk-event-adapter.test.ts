@@ -27,7 +27,7 @@ void test("maps mocked SDK message, tool-call, and tool-output events", async ()
         rawItem: {
           type: "function_call",
           name: "customer_lookup",
-          arguments: '{"name":"Jon Weller"}',
+          arguments: '{"name":"John Wheeler"}',
           callId: "call-1",
         },
       },
@@ -68,7 +68,7 @@ void test("maps mocked SDK message, tool-call, and tool-output events", async ()
     stored.map(({ event_type }) => event_type),
     ["model_output", "tool_call", "tool_result"],
   );
-  assert.deepEqual(stored[1]?.input, { name: "Jon Weller" });
+  assert.deepEqual(stored[1]?.input, { name: "John Wheeler" });
   assert.equal(stored[2]?.tool_call_id, "call-1");
   assert.deepEqual(stored[2].context_snapshot, {
     selected_customer_id: null,

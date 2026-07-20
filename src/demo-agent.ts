@@ -18,7 +18,7 @@ export interface DemoContext {
 export const demoContext: DemoContext = {
   customer_records: [
     { id: "CUST-1041", name: "John Wheeler", plan: "Pro", active: true },
-    { id: "CUST-1042", name: "Jon Weller", plan: "Basic", active: true },
+    { id: "CUST-1042", name: "John Wheeler", plan: "Basic", active: true },
   ],
   requested_name: "John Wheeler",
   selected_customer_id: null,

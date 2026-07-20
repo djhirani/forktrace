@@ -14,6 +14,9 @@
       * {
         box-sizing: border-box;
       }
+      [hidden] {
+        display: none !important;
+      }
       body {
         margin: 0;
         background:
@@ -83,6 +86,45 @@
         background: #101d19;
         font-family: ui-monospace, monospace;
       }
+      .correction {
+        margin: 0 24px 18px;
+        padding: 18px;
+        border: 1px solid #41695b;
+        background: #101d19;
+      }
+      .correction h2 {
+        margin-bottom: 14px;
+        font-size: 18px;
+      }
+      .correction-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 18px;
+        align-items: stretch;
+      }
+      .correction-call {
+        padding: 15px;
+        border: 1px solid #2c4039;
+        background: #0b1512;
+      }
+      .correction-call h3 {
+        margin: 0 0 11px;
+        font-size: 14px;
+      }
+      .correction-call p {
+        margin-top: 6px;
+        font:
+          12px ui-monospace,
+          monospace;
+      }
+      .correction-arrow {
+        align-self: center;
+        color: #ffbd66;
+        font:
+          700 15px ui-monospace,
+          monospace;
+        white-space: nowrap;
+      }
       .failed {
         color: #ff8585;
       }
@@ -123,6 +165,14 @@
         border: 1px solid #ffbd66;
         background: #251b0d;
       }
+      .event.correction-event {
+        border: 1px solid #68e0b1;
+        background: #12251f;
+      }
+      .tool-input {
+        color: #dff5ed !important;
+        white-space: pre-wrap;
+      }
       .tag {
         color: #171005;
         background: #ffbd66;
@@ -135,6 +185,14 @@
         padding: 0 24px 40px;
         display: flex;
         gap: 10px;
+      }
+      @media (max-width: 720px) {
+        .correction-grid {
+          grid-template-columns: 1fr;
+        }
+        .correction-arrow {
+          justify-self: center;
+        }
       }
     </style>
   </head>
@@ -157,9 +215,13 @@
         <button id="original" class="active">Original failing run</button
         ><button id="fork">Show precomputed fork &amp; diff</button>
       </div>
+      <section class="correction" id="correction" aria-live="polite">
+        <h2>Fork correction</h2>
+        <div class="correction-grid" id="correction-grid"></div>
+      </section>
       <section class="diff" id="diff" hidden>
-        <div class="failed">Original: Failed | 2 tool calls | 0.0 s</div>
-        <div class="passed">Fork: Passed | 3 tool calls | 0.0 s</div>
+        <div class="failed" id="original-summary"></div>
+        <div class="passed" id="fork-summary"></div>
       </section>
       <section class="timeline" id="timeline" aria-live="polite"></section>
       <div class="links">
@@ -172,6 +234,9 @@
     <script>
       const timeline = document.querySelector("#timeline");
       const diff = document.querySelector("#diff");
+      const correctionGrid = document.querySelector("#correction-grid");
+      const originalSummary = document.querySelector("#original-summary");
+      const forkSummary = document.querySelector("#fork-summary");
       const buttons = [
         document.querySelector("#original"),
         document.querySelector("#fork"),
@@ -188,29 +253,105 @@
         run_completed: "Run completed",
         diverged: "DIVERGED — live execution from here",
       };
-      async function show(name) {
-        const text = await fetch("/" + name).then((r) => r.text());
-        const events = text.trim().split("\n").map(JSON.parse);
-        timeline.innerHTML = events
-          .map(
-            (e) =>
-              `<article class="event ${e.event_type === "diverged" ? "diverged" : ""}"><span class="index">${String(e.event_index).padStart(2, "0")}</span><div>${e.event_type === "diverged" ? '<span class="tag">DIVERGED</span>' : ""}<strong>${labels[e.event_type]}</strong><p>${e.tool_name ?? e.status}</p></div><span class="meta">${e.status}</span></article>`,
+      const traces = Promise.all([
+        loadTrace("original.jsonl"),
+        loadTrace("precomputed-fork.jsonl"),
+      ]).then(([original, fork]) => {
+        renderCorrection(original, fork);
+        renderSummary(originalSummary, "Original", original);
+        renderSummary(forkSummary, "Fork", fork);
+        return { original, fork };
+      });
+      async function loadTrace(name) {
+        const text = await fetch("/" + name).then((response) =>
+          response.text(),
+        );
+        return text.trim().split("\n").map(JSON.parse);
+      }
+      function refundCall(events) {
+        return events.find(
+          (event) =>
+            event.event_index === 8 &&
+            event.event_type === "tool_call" &&
+            event.tool_name === "process_refund",
+        );
+      }
+      function customerName(events, customerId) {
+        const snapshot = events
+          .filter((event) => event.context_snapshot?.customer_records)
+          .at(-1)?.context_snapshot;
+        return snapshot?.customer_records?.find(
+          (customer) => customer.id === customerId,
+        )?.name;
+      }
+      function refundPassed(events, call) {
+        const result = events
+          .filter(
+            (event) =>
+              event.event_type === "tool_result" &&
+              event.tool_name === "process_refund" &&
+              (event.tool_call_id === call.tool_call_id ||
+                event.output?.customer_id === call.input.customer_id),
           )
+          .at(-1);
+        return result?.output?.ok === true;
+      }
+      function renderCorrection(original, fork) {
+        const originalCall = refundCall(original);
+        const forkCall = refundCall(fork);
+        const originalId = originalCall.input.customer_id;
+        const forkId = forkCall.input.customer_id;
+        correctionGrid.innerHTML = `${correctionCall("Original failed call", customerName(original, originalId), originalId, refundPassed(original, originalCall))}<div class="correction-arrow">${escapeHtml(originalId)} → ${escapeHtml(forkId)}</div>${correctionCall("Forked corrected call", customerName(fork, forkId), forkId, refundPassed(fork, forkCall))}`;
+      }
+      function correctionCall(title, customer, customerId, passed) {
+        return `<article class="correction-call"><h3>${escapeHtml(title)}</h3><p>Customer: ${escapeHtml(customer)}</p><p>Customer ID: ${escapeHtml(customerId)}</p><p class="${passed ? "passed" : "failed"}">process_refund: ${passed ? "Passed" : "Failed"}</p></article>`;
+      }
+      function renderSummary(element, label, events) {
+        const failed = events.some(
+          (event) =>
+            event.event_type === "run_completed" && event.status === "failed",
+        );
+        const calls = events.filter(
+          (event) => event.event_type === "tool_call",
+        ).length;
+        const latency = events.reduce(
+          (total, event) => total + (event.latency_ms ?? 0),
+          0,
+        );
+        element.textContent = `${label}: ${failed ? "Failed" : "Passed"} | ${latency.toFixed(1)} ms | ${calls} tool calls`;
+      }
+      function escapeHtml(value) {
+        const element = document.createElement("span");
+        element.textContent = String(value);
+        return element.innerHTML;
+      }
+      function show(events) {
+        timeline.innerHTML = events
+          .map((event) => {
+            const isRefundCall =
+              event.event_index === 8 &&
+              event.event_type === "tool_call" &&
+              event.tool_name === "process_refund";
+            const input = isRefundCall
+              ? `<p class="tool-input">Tool input: ${escapeHtml(JSON.stringify(event.input))}</p>`
+              : "";
+            return `<article class="event ${event.event_type === "diverged" ? "diverged" : ""} ${isRefundCall ? "correction-event" : ""}"><span class="index">${String(event.event_index).padStart(2, "0")}</span><div>${event.event_type === "diverged" ? '<span class="tag">DIVERGED</span>' : ""}<strong>${labels[event.event_type]}</strong><p>${escapeHtml(event.tool_name ?? event.status)}</p>${input}</div><span class="meta">${escapeHtml(event.status)}</span></article>`;
+          })
           .join("");
       }
-      buttons[0].onclick = () => {
+      buttons[0].onclick = async () => {
         buttons[0].classList.add("active");
         buttons[1].classList.remove("active");
         diff.hidden = true;
-        show("original.jsonl");
+        show((await traces).original);
       };
-      buttons[1].onclick = () => {
+      buttons[1].onclick = async () => {
         buttons[1].classList.add("active");
         buttons[0].classList.remove("active");
         diff.hidden = false;
-        show("precomputed-fork.jsonl");
+        show((await traces).fork);
       };
-      show("original.jsonl");
+      traces.then(({ original }) => show(original));
     </script>
   </body>
 </html>

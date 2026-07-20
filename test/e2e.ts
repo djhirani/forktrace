@@ -77,7 +77,7 @@ try {
   ]);
   assert.match(
     fork.text_summary,
-    /^Original: Failed \| [\d.]+ ms \| 0 tokens \| 2 tool calls\nFork:     Passed \| [\d.]+ ms \| 0 tokens \| 3 tool calls$/,
+    /^Original: Failed \| [\d.]+ ms \| 0 tokens \| 2 tool calls\nFork: {5}Passed \| [\d.]+ ms \| 0 tokens \| 3 tool calls$/,
   );
   assert.equal(
     fork.fork_events.some(

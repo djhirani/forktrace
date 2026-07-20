@@ -18,7 +18,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test test/**/*.test.ts",
-    "build": "tsc -p tsconfig.build.json && vite build"
+    "build": "tsc -p tsconfig.build.json && vite build",
+    "deploy:build": "npm run demo:reset && FORK_PATH=$(npm run --silent fork -- traces/runs/demo-refund-failure.jsonl 8 '{\"type\":\"tool_call_argument\",\"arguments\":{\"customer_id\":\"CUST-1041\",\"amount\":25}}' | tail -n 1) && npm run replay -- \"$FORK_PATH\" && npm run build && cp traces/runs/demo-refund-failure.jsonl dist/ui/original.jsonl && cp \"$FORK_PATH\" dist/ui/precomputed-fork.jsonl"
   },
   "dependencies": {
     "@openai/agents": "^0.3.0",

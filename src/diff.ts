@@ -244,8 +244,11 @@ function renderLine(
 ): string {
   const paddedLabel = label.padEnd(10);
   const status = capitalize(metricsValue.status);
-  const seconds = (metricsValue.total_latency_ms / 1000).toFixed(1);
-  return `${paddedLabel}${status} | ${String(metricsValue.tool_calls)} tool calls | ${seconds.padStart(4)} s`;
+  return `${paddedLabel}${status} | ${formatLatency(metricsValue.total_latency_ms)} | ${String(metricsValue.token_usage.total_tokens)} tokens | ${String(metricsValue.tool_calls)} tool calls`;
+}
+
+function formatLatency(milliseconds: number): string {
+  return `${milliseconds.toFixed(1)} ms`;
 }
 
 function capitalize(value: "passed" | "failed"): "Passed" | "Failed" {

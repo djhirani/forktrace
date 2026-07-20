@@ -258,6 +258,24 @@ button:disabled {
   color: var(--muted);
   font: 400 10px "DM Mono";
 }
+.tool-arguments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+  color: #b9d4cb;
+  font: 400 10px "DM Mono";
+}
+.tool-arguments span {
+  border: 1px solid #30453e;
+  background: #101d19;
+  padding: 3px 5px;
+}
+.tool-arguments .changed-argument {
+  border-color: var(--amber);
+  background: #352712;
+  color: #ffd27a;
+}
 .event-body p {
   margin-top: 5px;
   white-space: nowrap;
@@ -339,6 +357,15 @@ button:disabled {
   gap: 5px;
   color: #d8ebe4;
   font: 500 11px "DM Mono";
+}
+.diff-lines strong {
+  color: var(--mint);
+  font-size: 15px;
+}
+.diff-lines small {
+  color: var(--muted);
+  border-top: 1px solid #355047;
+  padding-top: 5px;
 }
 .diff-meta {
   border-left: 1px solid #355047;

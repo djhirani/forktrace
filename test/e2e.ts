@@ -65,8 +65,8 @@ try {
   assert.equal(fork.report.fork.status, "passed");
   assert.equal(fork.report.original.tool_calls, 2);
   assert.equal(fork.report.fork.tool_calls, 3);
-  assert.equal(fork.report.original.total_latency_ms, 0);
-  assert.equal(fork.report.fork.total_latency_ms, 0);
+  assert.ok(fork.report.original.total_latency_ms > 0);
+  assert.ok(fork.report.fork.total_latency_ms > 0);
   assert.equal(fork.report.first_divergence_event_index, 10);
   assert.equal(
     fork.report.findings[0]?.message,
@@ -75,12 +75,9 @@ try {
   assert.deepEqual(fork.report.findings[0].evidence, [
     { trace: "fork", event_indexes: [10] },
   ]);
-  assert.equal(
+  assert.match(
     fork.text_summary,
-    [
-      "Original: Failed | 2 tool calls |  0.0 s",
-      "Fork:     Passed | 3 tool calls |  0.0 s",
-    ].join("\n"),
+    /^Original: Failed \| [\d.]+ ms \| 0 tokens \| 2 tool calls\nFork:     Passed \| [\d.]+ ms \| 0 tokens \| 3 tool calls$/,
   );
   assert.equal(
     fork.fork_events.some(

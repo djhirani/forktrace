@@ -141,6 +141,7 @@ export async function replayFork(
     description: "Process a refund in the run-local in-memory store.",
     parameters: refundInput,
     execute: async (input, _context, details) => {
+      const started = performance.now();
       const key = toolKey("process_refund", input);
       const recorded = memoized.get(key);
       const toolCallId = details?.toolCall.callId ?? "replay-process-refund";
@@ -180,12 +181,14 @@ export async function replayFork(
             tool_call_id: toolCallId,
             status: "ok",
             replayed_from_recording: true,
+            latency_ms: elapsedMs(started),
           }),
         );
         return outcome;
       }
       liveToolCalls += 1;
       outcome = store.processRefund(input);
+      const latencyMs = elapsedMs(started);
       await recorder.append(
         event({
           event_type: "tool_result",
@@ -193,6 +196,7 @@ export async function replayFork(
           tool_name: "process_refund",
           tool_call_id: toolCallId,
           status: outcome.ok === true ? "ok" : "failed",
+          latency_ms: latencyMs,
         }),
       );
       return outcome;
@@ -248,6 +252,10 @@ export async function replayFork(
       final_output: succeeded ? outcome : finalOutput,
     },
   };
+}
+
+function elapsedMs(started: number): number {
+  return Math.max(0.001, Number((performance.now() - started).toFixed(3)));
 }
 
 export function reconstructReplayState(events: TraceEvent[]): ReplayState {

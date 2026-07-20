@@ -51,14 +51,16 @@ export async function recordDemoRun(
   );
 
   // Structural failure: both records are returned and the scripted choice is always CUST-1042.
+  const lookupStarted = performance.now();
   context.lookup_attempts += 1;
+  const lookupLatencyMs = elapsedMs(lookupStarted);
   await recorder.append(
     event({
       event_type: "tool_result",
       output: context.customer_records,
       tool_name: "customer_lookup",
       tool_call_id: "call_lookup_001",
-      latency_ms: 0,
+      latency_ms: lookupLatencyMs,
     }),
   );
   await recorder.append(
@@ -87,17 +89,20 @@ export async function recordDemoRun(
       status: "started",
     }),
   );
+  const refundStarted = performance.now();
+  const refundOutput = {
+    ok: false,
+    error: "Customer ID does not match the requested customer",
+  };
+  const refundLatencyMs = elapsedMs(refundStarted);
   await recorder.append(
     event({
       event_type: "tool_result",
-      output: {
-        ok: false,
-        error: "Customer ID does not match the requested customer",
-      },
+      output: refundOutput,
       tool_name: "process_refund",
       tool_call_id: "call_refund_001",
       status: "failed",
-      latency_ms: 0,
+      latency_ms: refundLatencyMs,
     }),
   );
   await recorder.append(
@@ -122,6 +127,10 @@ export async function recordDemoRun(
     }),
   );
   return tracePath;
+}
+
+function elapsedMs(started: number): number {
+  return Math.max(0.001, Number((performance.now() - started).toFixed(3)));
 }
 
 function event(overrides: Partial<NewTraceEvent>): NewTraceEvent {

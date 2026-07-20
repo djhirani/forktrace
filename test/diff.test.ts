@@ -211,8 +211,8 @@ void test("renders the exact fixed-width demo summary", async () => {
   assert.equal(
     renderDiffText(await diffRuns(originalPath, forkPath)),
     [
-      "Original: Failed | 1 tool calls |  0.1 s",
-      "Fork:     Passed | 2 tool calls |  0.1 s",
+      "Original: Failed | 150.0 ms | 15 tokens | 1 tool calls",
+      "Fork:     Passed | 100.0 ms | 0 tokens | 2 tool calls",
     ].join("\n"),
   );
 });

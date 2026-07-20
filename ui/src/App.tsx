@@ -194,6 +194,8 @@ export function App() {
                 selected={selectedEvent}
                 onSelect={setSelectedEvent}
                 onFork={openFork}
+                changedArguments={forkResult?.report.edit ?? null}
+                trace="original"
               />
               {forkResult !== null && (
                 <Timeline
@@ -202,6 +204,8 @@ export function App() {
                   selected={selectedEvent}
                   onSelect={setSelectedEvent}
                   onFork={openFork}
+                  changedArguments={forkResult.report.edit}
+                  trace="fork"
                 />
               )}
               <EventDetail event={selectedEvent} />
@@ -295,12 +299,16 @@ function Timeline({
   selected,
   onSelect,
   onFork,
+  changedArguments,
+  trace,
 }: {
   title: string;
   events: TraceEvent[];
   selected: TraceEvent | null;
   onSelect: (event: TraceEvent) => void;
   onFork: (event: TraceEvent) => void;
+  changedArguments: DiffReport["edit"] | null;
+  trace: "original" | "fork";
 }) {
   return (
     <section className="timeline-panel">
@@ -344,6 +352,18 @@ function Timeline({
                   </span>
                 </div>
                 <p>{event.tool_name ?? eventSummary(event)}</p>
+                {event.event_type === "tool_call" && (
+                  <ToolArguments
+                    value={event.input}
+                    comparison={
+                      changedArguments?.event_index === event.event_index
+                        ? trace === "original"
+                          ? changedArguments.after
+                          : changedArguments.before
+                        : null
+                    }
+                  />
+                )}
                 {canFork && (
                   <button
                     className="fork-button"
@@ -397,7 +417,7 @@ function Detail({ label, value }: { label: string; value: unknown }) {
 }
 
 function DiffBanner({ result }: { result: ForkResponse }) {
-  const [original, fork] = result.text_summary.split("\n");
+  const { original, fork } = result.report;
   const finding = result.report.findings[0];
   const evidence = finding?.evidence
     .map(
@@ -412,8 +432,20 @@ function DiffBanner({ result }: { result: ForkResponse }) {
         <h2>One edit. A different outcome.</h2>
       </div>
       <div className="diff-lines">
-        <span>{original}</span>
-        <span>{fork}</span>
+        <strong>
+          {displayStatus(original.status)} → {displayStatus(fork.status)}
+        </strong>
+        <span>
+          Total latency {formatLatency(original.total_latency_ms)} →{" "}
+          {formatLatency(fork.total_latency_ms)}
+        </span>
+        <span>
+          Token usage {original.token_usage.total_tokens} →{" "}
+          {fork.token_usage.total_tokens}
+        </span>
+        <small>
+          Tool calls: {original.tool_calls} → {fork.tool_calls}
+        </small>
       </div>
       <div className="diff-meta">
         <strong>First divergence</strong>
@@ -431,6 +463,45 @@ function DiffBanner({ result }: { result: ForkResponse }) {
       )}
     </section>
   );
+}
+
+function ToolArguments({
+  value,
+  comparison,
+}: {
+  value: TraceEvent["input"];
+  comparison: unknown;
+}) {
+  if (value === null || Array.isArray(value) || typeof value !== "object")
+    return null;
+  const other =
+    comparison !== null &&
+    !Array.isArray(comparison) &&
+    typeof comparison === "object"
+      ? (comparison as Record<string, unknown>)
+      : null;
+  return (
+    <div className="tool-arguments">
+      {Object.entries(value).map(([key, argument]) => {
+        const changed =
+          other !== null &&
+          JSON.stringify(argument) !== JSON.stringify(other[key]);
+        return (
+          <span className={changed ? "changed-argument" : ""} key={key}>
+            {key}={formatArgument(argument)}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function formatArgument(value: unknown): string {
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
+function formatLatency(milliseconds: number): string {
+  return `${milliseconds.toFixed(1)} ms`;
 }
 
 function EmptyState({ onRun }: { onRun: () => void }) {

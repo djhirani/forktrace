@@ -70,6 +70,7 @@ export async function recordDemoRun(
         decision: "process_refund",
         selected_customer_id: "CUST-1042",
         amount: 25,
+        currency: "USD",
       },
     }),
   );
@@ -83,7 +84,7 @@ export async function recordDemoRun(
   await recorder.append(
     event({
       event_type: "tool_call",
-      input: { customer_id: "CUST-1042", amount: 25 },
+      input: { customer_id: "CUST-1042", amount: 25, currency: "USD" },
       tool_name: "process_refund",
       tool_call_id: "call_refund_001",
       status: "started",

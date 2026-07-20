@@ -25,6 +25,7 @@ try {
     assert.deepEqual(refundCall?.input, {
       customer_id: "CUST-1042",
       amount: 25,
+      currency: "USD",
     });
     assert.equal(refundResult?.status, "failed");
     assert.deepEqual(error?.output, {

@@ -43,7 +43,7 @@ async function sourceTrace(): Promise<string> {
   await recorder.append(
     base({
       event_type: "tool_call",
-      input: { customer_id: "CUST-1042", amount: 25 },
+      input: { customer_id: "CUST-1042", amount: 25, currency: "USD" },
       tool_name: "process_refund",
       tool_call_id: "refund-1",
       status: "started",
@@ -72,7 +72,7 @@ void test("forks through N, stamps lineage, edits N, and preserves source bytes"
   const before = await sha256(sourcePath);
   const forkPath = await forkRun(sourcePath, 3, {
     type: "tool_call_argument",
-    arguments: { customer_id: "CUST-1041", amount: 25 },
+    arguments: { customer_id: "CUST-1041", amount: 25, currency: "USD" },
   });
   const fork = await readTrace(forkPath);
 
@@ -94,6 +94,7 @@ void test("forks through N, stamps lineage, edits N, and preserves source bytes"
   assert.deepEqual(fork[3]?.input, {
     customer_id: "CUST-1041",
     amount: 25,
+    currency: "USD",
   });
   assert.equal(fork[3].status, "ok");
   assert.equal(fork[3].edited, true);

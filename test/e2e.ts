@@ -55,7 +55,11 @@ try {
       event_index: 8,
       edit: {
         type: "tool_call_argument",
-        arguments: { customer_id: "CUST-1041", amount: 25 },
+        arguments: {
+          customer_id: "CUST-1041",
+          amount: 25,
+          currency: "USD",
+        },
       },
     }),
   });

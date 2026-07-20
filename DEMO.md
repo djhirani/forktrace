@@ -25,7 +25,7 @@ npm run dev
 ### 1:00 — Inspect the bad call
 
 - Click event 8, the `process_refund` tool call.
-- Show its input in the detail pane: `customer_id: CUST-1042`, `amount: 25`.
+- Show its input in the detail pane: `customer_id: CUST-1042`, `amount: $25 USD`.
 - Say: “This is observable evidence—not hidden model reasoning. The bad argument is explicit in the trace.”
 - Click **Fork here**.
 

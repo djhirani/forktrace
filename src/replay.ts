@@ -59,7 +59,10 @@ interface MemoizedResult {
 }
 
 export class InMemoryRefundStore {
-  readonly refunds = new Map<string, number>();
+  readonly refunds = new Map<
+    string,
+    { amount: number; currency: RefundInput["currency"] }
+  >();
   executionCount = 0;
 
   processRefund(input: RefundInput): JsonObject {
@@ -70,8 +73,16 @@ export class InMemoryRefundStore {
         error: "Customer ID does not match the requested customer",
       };
     }
-    this.refunds.set(input.customer_id, input.amount);
-    return { ok: true, customer_id: input.customer_id, amount: input.amount };
+    this.refunds.set(input.customer_id, {
+      amount: input.amount,
+      currency: input.currency,
+    });
+    return {
+      ok: true,
+      customer_id: input.customer_id,
+      amount: input.amount,
+      currency: input.currency,
+    };
   }
 }
 
@@ -82,6 +93,7 @@ export interface ReplayOptions {
 const refundInput = z.object({
   customer_id: z.string(),
   amount: z.number(),
+  currency: z.literal("USD"),
 });
 type RefundInput = z.infer<typeof refundInput>;
 

@@ -60,7 +60,7 @@ async function createOriginal(): Promise<string> {
   await recorder.append(
     base({
       event_type: "tool_call",
-      input: { customer_id: "CUST-1042", amount: 25 },
+      input: { customer_id: "CUST-1042", amount: 25, currency: "USD" },
       tool_name: "process_refund",
       tool_call_id: "refund-original",
       status: "started",
@@ -94,7 +94,7 @@ void test("reconstructs messages and context only through fork_at_event", async 
   const originalPath = await createOriginal();
   const forkPath = await forkRun(originalPath, 4, {
     type: "tool_call_argument",
-    arguments: { customer_id: "CUST-1041", amount: 25 },
+    arguments: { customer_id: "CUST-1041", amount: 25, currency: "USD" },
   });
   const fork = await readTrace(forkPath);
   const poison = {
@@ -120,7 +120,7 @@ void test("a corrected fork diverges at the edit, executes live, and passes", as
   const originalHash = await sha256(originalPath);
   const forkPath = await forkRun(originalPath, 4, {
     type: "tool_call_argument",
-    arguments: { amount: 25, customer_id: "CUST-1041" },
+    arguments: { amount: 25, currency: "USD", customer_id: "CUST-1041" },
   });
   const store = new InMemoryRefundStore();
   const result = await replayFork(forkPath, { store });
@@ -152,7 +152,7 @@ void test("a no-op fork memoizes the tool without executing its body or divergin
   const originalPath = await createOriginal();
   const forkPath = await forkRun(originalPath, 4, {
     type: "tool_call_argument",
-    arguments: { customer_id: "CUST-1042", amount: 25 },
+    arguments: { customer_id: "CUST-1042", amount: 25, currency: "USD" },
   });
   const store = new InMemoryRefundStore();
   const result = await replayFork(forkPath, { store });

@@ -509,17 +509,33 @@ function ToolArguments({
   return (
     <div className="tool-arguments">
       {Object.entries(value).map(([key, argument]) => {
+        if (key === "currency" && "amount" in value) return null;
         const changed =
           other !== null &&
           JSON.stringify(argument) !== JSON.stringify(other[key]);
         return (
           <span className={changed ? "changed-argument" : ""} key={key}>
-            {key}={formatArgument(argument)}
+            {key}={formatToolArgument(key, argument, value)}
           </span>
         );
       })}
     </div>
   );
+}
+
+function formatToolArgument(
+  key: string,
+  value: unknown,
+  input: Record<string, unknown>,
+): string {
+  if (
+    key === "amount" &&
+    typeof value === "number" &&
+    input.currency === "USD"
+  ) {
+    return `$${String(value)} USD`;
+  }
+  return formatArgument(value);
 }
 
 function formatArgument(value: unknown): string {

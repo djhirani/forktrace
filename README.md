@@ -74,7 +74,7 @@ npm run demo:reset
 FORK_PATH=$(npm run --silent fork -- \
   traces/runs/demo-refund-failure.jsonl \
   8 \
-  '{"type":"tool_call_argument","arguments":{"customer_id":"CUST-1041","amount":25}}' \
+  '{"type":"tool_call_argument","arguments":{"customer_id":"CUST-1041","amount":25,"currency":"USD"}}' \
   | tail -n 1)
 
 npm run replay -- "$FORK_PATH"

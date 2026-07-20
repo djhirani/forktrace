@@ -23,7 +23,7 @@ async function createFixture(): Promise<{
   await original.append(
     event({
       event_type: "tool_call",
-      input: { customer_id: "CUST-1042", amount: 25 },
+      input: { customer_id: "CUST-1042", amount: 25, currency: "USD" },
       tool_name: "process_refund",
       tool_call_id: "original-call",
       status: "started",
@@ -57,7 +57,7 @@ async function createFixture(): Promise<{
   await fork.append(
     event({
       event_type: "tool_call",
-      input: { customer_id: "CUST-1041", amount: 25 },
+      input: { customer_id: "CUST-1041", amount: 25, currency: "USD" },
       tool_name: "process_refund",
       tool_call_id: "original-call",
       status: "ok",
@@ -76,7 +76,7 @@ async function createFixture(): Promise<{
   await fork.append(
     event({
       event_type: "tool_call",
-      input: { customer_id: "CUST-1041", amount: 25 },
+      input: { customer_id: "CUST-1041", amount: 25, currency: "USD" },
       tool_name: "process_refund",
       tool_call_id: "replay-call",
       status: "ok",
@@ -146,10 +146,12 @@ void test("computes exact fixture metrics and edit evidence from the logs", asyn
   assert.deepEqual(report.edit.before, {
     customer_id: "CUST-1042",
     amount: 25,
+    currency: "USD",
   });
   assert.deepEqual(report.edit.after, {
     customer_id: "CUST-1041",
     amount: 25,
+    currency: "USD",
   });
   assert.equal(report.first_divergence_event_index, 2);
   assert.equal(report.diverged_tool_name, "process_refund");

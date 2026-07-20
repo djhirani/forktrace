@@ -374,18 +374,26 @@
         const forkCall = refundCall(fork);
         const originalId = originalCall.input.customer_id;
         const forkId = forkCall.input.customer_id;
+        const originalAmount = formatMoney(originalCall.input);
+        const forkAmount = formatMoney(forkCall.input);
         const originalCard = correctionCall(
           "Original failed call",
           customerName(original, originalId),
           originalId,
+          originalAmount,
           refundPassed(original, originalCall),
         );
         correctionGrid.innerHTML = revealFork
-          ? `${originalCard}<div class="correction-arrow">${escapeHtml(originalId)} → ${escapeHtml(forkId)}</div>${correctionCall("Forked corrected call", customerName(fork, forkId), forkId, refundPassed(fork, forkCall))}`
+          ? `${originalCard}<div class="correction-arrow">${escapeHtml(originalId)} → ${escapeHtml(forkId)}</div>${correctionCall("Forked corrected call", customerName(fork, forkId), forkId, forkAmount, refundPassed(fork, forkCall))}`
           : originalCard;
       }
-      function correctionCall(title, customer, customerId, passed) {
-        return `<article class="correction-call"><h3>${escapeHtml(title)}</h3><p>Customer: ${escapeHtml(customer)}</p><p>Customer ID: ${escapeHtml(customerId)}</p><p class="${passed ? "passed" : "failed"}">process_refund: ${passed ? "Passed" : "Failed"}</p></article>`;
+      function formatMoney(input) {
+        return input.currency === "USD"
+          ? `$${input.amount} USD`
+          : `${input.amount} ${input.currency ?? ""}`.trim();
+      }
+      function correctionCall(title, customer, customerId, amount, passed) {
+        return `<article class="correction-call"><h3>${escapeHtml(title)}</h3><p>Customer: ${escapeHtml(customer)}</p><p>Customer ID: ${escapeHtml(customerId)}</p><p>Amount: ${escapeHtml(amount)}</p><p class="${passed ? "passed" : "failed"}">process_refund: ${passed ? "Passed" : "Failed"}</p></article>`;
       }
       function renderSummary(element, label, events) {
         const failed = events.some(
@@ -425,7 +433,7 @@
               event.event_type === "tool_call" &&
               event.tool_name === "process_refund";
             const input = isRefundCall
-              ? `<p class="tool-input">Tool input: ${escapeHtml(JSON.stringify(event.input))}</p>`
+              ? `<p class="tool-input">Tool input: ${escapeHtml(event.input.customer_id)} · ${escapeHtml(formatMoney(event.input))}</p>`
               : "";
             return `<article class="event ${event.event_type === "diverged" ? "diverged" : ""} ${isRefundCall ? "correction-event" : ""}"><span class="index">${String(event.event_index).padStart(2, "0")}</span><div>${event.event_type === "diverged" ? '<span class="tag">DIVERGED</span>' : ""}<strong>${labels[event.event_type]}</strong><p>${escapeHtml(event.tool_name ?? event.status)}</p>${input}</div><span class="meta">${escapeHtml(event.status)}</span></article>`;
           })

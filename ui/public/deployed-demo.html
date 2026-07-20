@@ -220,7 +220,7 @@
         <div class="correction-grid" id="correction-grid"></div>
       </section>
       <section class="diff" id="diff" hidden>
-        <div class="failed" id="original-summary"></div>
+        <div id="status-transition"></div>
         <div class="passed" id="fork-summary"></div>
       </section>
       <section class="timeline" id="timeline" aria-live="polite"></section>
@@ -235,7 +235,7 @@
       const timeline = document.querySelector("#timeline");
       const diff = document.querySelector("#diff");
       const correctionGrid = document.querySelector("#correction-grid");
-      const originalSummary = document.querySelector("#original-summary");
+      const statusTransition = document.querySelector("#status-transition");
       const forkSummary = document.querySelector("#fork-summary");
       const buttons = [
         document.querySelector("#original"),
@@ -257,8 +257,8 @@
         loadTrace("original.jsonl"),
         loadTrace("precomputed-fork.jsonl"),
       ]).then(([original, fork]) => {
-        renderCorrection(original, fork);
-        renderSummary(originalSummary, "Original", original);
+        renderCorrection(original, fork, false);
+        renderStatusTransition(statusTransition, original, fork);
         renderSummary(forkSummary, "Fork", fork);
         return { original, fork };
       });
@@ -296,12 +296,20 @@
           .at(-1);
         return result?.output?.ok === true;
       }
-      function renderCorrection(original, fork) {
+      function renderCorrection(original, fork, revealFork) {
         const originalCall = refundCall(original);
         const forkCall = refundCall(fork);
         const originalId = originalCall.input.customer_id;
         const forkId = forkCall.input.customer_id;
-        correctionGrid.innerHTML = `${correctionCall("Original failed call", customerName(original, originalId), originalId, refundPassed(original, originalCall))}<div class="correction-arrow">${escapeHtml(originalId)} → ${escapeHtml(forkId)}</div>${correctionCall("Forked corrected call", customerName(fork, forkId), forkId, refundPassed(fork, forkCall))}`;
+        const originalCard = correctionCall(
+          "Original failed call",
+          customerName(original, originalId),
+          originalId,
+          refundPassed(original, originalCall),
+        );
+        correctionGrid.innerHTML = revealFork
+          ? `${originalCard}<div class="correction-arrow">${escapeHtml(originalId)} → ${escapeHtml(forkId)}</div>${correctionCall("Forked corrected call", customerName(fork, forkId), forkId, refundPassed(fork, forkCall))}`
+          : originalCard;
       }
       function correctionCall(title, customer, customerId, passed) {
         return `<article class="correction-call"><h3>${escapeHtml(title)}</h3><p>Customer: ${escapeHtml(customer)}</p><p>Customer ID: ${escapeHtml(customerId)}</p><p class="${passed ? "passed" : "failed"}">process_refund: ${passed ? "Passed" : "Failed"}</p></article>`;
@@ -319,6 +327,17 @@
           0,
         );
         element.textContent = `${label}: ${failed ? "Failed" : "Passed"} | ${latency.toFixed(1)} ms | ${calls} tool calls`;
+      }
+      function runStatus(events) {
+        return events.some(
+          (event) =>
+            event.event_type === "run_completed" && event.status === "failed",
+        )
+          ? "Failed"
+          : "Passed";
+      }
+      function renderStatusTransition(element, original, fork) {
+        element.textContent = `${runStatus(original)} → ${runStatus(fork)}`;
       }
       function escapeHtml(value) {
         const element = document.createElement("span");
@@ -343,13 +362,17 @@
         buttons[0].classList.add("active");
         buttons[1].classList.remove("active");
         diff.hidden = true;
-        show((await traces).original);
+        const loaded = await traces;
+        renderCorrection(loaded.original, loaded.fork, false);
+        show(loaded.original);
       };
       buttons[1].onclick = async () => {
         buttons[1].classList.add("active");
         buttons[0].classList.remove("active");
         diff.hidden = false;
-        show((await traces).fork);
+        const loaded = await traces;
+        renderCorrection(loaded.original, loaded.fork, true);
+        show(loaded.fork);
       };
       traces.then(({ original }) => show(original));
     </script>
